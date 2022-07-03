@@ -84,8 +84,9 @@ const HelloWorld = () => {
 		setWallet(address);
   };
 
-  const onUpdatePressed = async () => { //TODO: implement
-
+  const onUpdatePressed = async () => {
+		const { status } = await updateMessage(walletAddress, newMessage);
+		setStatus(status);
   };
 
   //the UI of our component
