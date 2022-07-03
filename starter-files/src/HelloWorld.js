@@ -18,24 +18,74 @@ const HelloWorld = () => {
   const [newMessage, setNewMessage] = useState("");
 
   //called only once
-  useEffect(async () => {
-    
+  useEffect(() => {
+		async function initCurrentMessage() {
+			const message = await loadCurrentMessage();
+			setMessage(message);
+		};
+
+		async function initWallet() {
+			const { status, address } = await getCurrentWalletConnected();
+			setStatus(status);
+			setWallet(address);
+		}
+
+		initCurrentMessage();
+		initWallet();
+		addSmartContractListener();
+		addWalletListener();
   }, []);
 
-  function addSmartContractListener() { //TODO: implement
-    
+  function addSmartContractListener() {
+		helloWorldContract.events.UpdatedMessages({}, (error, data) => {
+			if (error) {
+				setStatus("😥 " + error.message);
+			} else {
+				setMessage(data.returnValues[1]);
+				setNewMessage("");
+				setStatus("🎉 Your message has been updated!");
+			}
+		})
   }
 
-  function addWalletListener() { //TODO: implement
-    
+  function addWalletListener() {
+		if (window.ethereum) {
+			window.ethereum.on("accountsChanged", (accounts) => {
+				if (accounts.length > 0) {
+					setWallet(accounts[0]);
+					setStatus("👆🏽 Write a message in the text-field above.");
+				} else {
+					setWallet("");
+					setStatus("🦊 Connect to Metamask using the top right button.");
+				}
+			})
+		} else {
+			setWallet("");
+			setStatus(
+				<span>
+          <p>
+            {" "}
+            🦊{" "}
+            <a href="https://metamask.io/download.html" target="_blank" rel="noopener noreferrer">
+              You must install Metamask, a virtual Ethereum wallet, in your
+              browser.
+            </a>
+          </p>
+        </span>
+			)
+		}
+
   }
 
-  const connectWalletPressed = async () => { //TODO: implement
-    
+  const connectWalletPressed = async () => {
+		const { address, status } = await connectWallet();
+
+		setStatus(status);
+		setWallet(address);
   };
 
   const onUpdatePressed = async () => { //TODO: implement
-    
+
   };
 
   //the UI of our component
